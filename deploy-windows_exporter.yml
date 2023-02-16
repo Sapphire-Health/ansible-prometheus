@@ -53,7 +53,7 @@
                 common_name: "{{ server_name }}"
                 alt_names: "{{ server_name }}"
                 private_key_format: "pkcs8"
-                ttl: "1h"
+                ttl: "8760h"
                 format: "pem"
               status_code: 200
             register: cert
