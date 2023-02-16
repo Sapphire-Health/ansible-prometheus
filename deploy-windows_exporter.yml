@@ -1,0 +1,111 @@
+---
+  - name: Deploy windows_exporter
+    hosts: "{{ match_host }}"
+    gather_facts: true
+    tasks:
+      - name: Check if install directory exists
+        win_stat: 
+          path: "{{ install_dir }}"  
+        register: installdir
+      - name: Create install directory if it doesn't exist
+        win_file:
+          path: "{{ install_dir }}"
+          state: directory
+        when: installdir.stat.exists == false
+      - name: Check if ca file exists
+        win_stat: 
+          path: "{{ install_dir }}/ca.crt"  
+        register: file_ca
+      - name: Check if cert file exists
+        win_stat: 
+          path: "{{ install_dir }}/cert.crt"  
+        register: file_cert
+      - name: Check if key file exists
+        win_stat: 
+          path: "{{ install_dir }}/cert.key"  
+        register: file_key
+      - name: Generate certificates
+        block:
+          - name: Get server name (GATHER_FACTS MUST BE TRUE OR THIS WILL FAIL)
+            set_fact:
+              server_name: "{{ ansible_fqdn | lower }}"
+          - name:
+            win_uri:
+              url: "{{ VAULT_ADDR }}/v1/auth/approle/login"
+              method: POST
+              return_content: true
+              headers:
+                accept: application/json
+              body:
+                role_id: "{{ lookup('env','role_id') }}"
+                secret_id: "{{ lookup('env','secret_id') }}"
+              status_code: 200
+            register: vault_auth
+          - name:
+            win_uri:
+              url: "{{ VAULT_ADDR }}/v1/prompki/issue/server"
+              method: POST
+              return_content: true
+              headers:
+                accept: application/json
+                X-Vault-Token: "{{ vault_auth.json.auth.client_token }}"
+              body:
+                common_name: "{{ server_name }}"
+                alt_names: "{{ server_name }}"
+                private_key_format: "pkcs8"
+                ttl: "1h"
+                format: "pem"
+              status_code: 200
+            register: cert
+          #- name:
+          #  debug:
+          #    msg: "{{ cert.json }}"
+          - name: Write ca file
+            win_copy:
+              content: "{{ cert.json.data.issuing_ca }}"
+              dest: "{{ install_dir }}/ca.crt"  
+          - name: Write cert file
+            win_copy:
+              content: "{{ cert.json.data.certificate }}"
+              dest: "{{ install_dir }}/cert.crt"  
+          - name: Write key file
+            win_copy:
+              content: "{{ cert.json.data.private_key }}"
+              dest: "{{ install_dir }}/cert.key"  
+        when: file_ca.stat.exists == false or file_cert.stat.exists == false or file_key.stat.exists == false
+      - name: Check if config exists
+        win_stat: 
+          path: "{{ install_dir }}/config.yml"
+        register: config
+      - name: Create config.yml if it doesn't exist
+        win_template:
+          src: config.yml.j2
+          dest: "{{ install_dir }}/config.yml"
+        when: config.stat.exists == false
+      - name: Check if web config exists
+        win_stat: 
+          path: "{{ install_dir }}/web-config.yml"
+        register: webconfig
+      - name: Create web-config.yml
+        win_template:
+          src: web-config.yml.j2
+          dest: "{{ install_dir }}/web-config.yml"
+        when: webconfig.stat.exists == false
+      #- name:
+      #  debug:
+      #    msg: "{{ file_key }}"
+      - name: Download windows_exporter
+        win_get_url:
+          url: "{{ package_url }}{{ package_name }}"
+          dest: C:\Windows\Temp\
+      - name: Install/Update windows_exporter
+        #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
+        win_package:
+          path: "C:\\Windows\\Temp\\{{ package_name }}"
+          #product_id: "{{ product_id }}"
+          state: present
+          arguments: "{{ install_params }}"
+      - name: Delete windows_exporter msi
+        win_file:
+          path: "C:\\Windows\\Temp\\{{ package_name }}"
+          state: absent
