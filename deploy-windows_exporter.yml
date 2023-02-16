@@ -122,3 +122,7 @@
         win_file:
           path: "C:\\Windows\\Temp\\{{ package_name }}"
           state: absent
+      - name: Restart a service
+        win_service:
+          name: windows_exporter
+          state: restarted
