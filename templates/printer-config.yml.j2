@@ -1,0 +1,11 @@
+collectors:
+  enabled: service,cpu,cs,logical_disk,os,system
+collector:
+  service:
+    services-where: "Name='print management' OR Name='spooler'"
+log:
+  level: warn
+telemetry:
+  addr: ":9182"
+  path: /metrics
+  max-requests: 5

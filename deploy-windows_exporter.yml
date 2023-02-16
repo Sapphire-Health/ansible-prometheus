@@ -73,24 +73,24 @@
               content: "{{ cert.json.data.private_key }}"
               dest: "{{ install_dir }}/cert.key"  
         when: file_ca.stat.exists == false or file_cert.stat.exists == false or file_key.stat.exists == false
-      - name: Check if config exists
-        win_stat: 
-          path: "{{ install_dir }}/config.yml"
-        register: config
-      - name: Create config.yml if it doesn't exist
+      #- name: Check if config exists
+      #  win_stat: 
+      #    path: "{{ install_dir }}/config.yml"
+      #  register: config
+      - name: Create config.yml
         win_template:
-          src: config.yml.j2
+          src: "{{ prometheus_config | default('config.yml.j2') }}"
           dest: "{{ install_dir }}/config.yml"
-        when: config.stat.exists == false
-      - name: Check if web config exists
-        win_stat: 
-          path: "{{ install_dir }}/web-config.yml"
-        register: webconfig
+      #  when: config.stat.exists == false
+      #- name: Check if web config exists
+      #  win_stat: 
+      #    path: "{{ install_dir }}/web-config.yml"
+      #  register: webconfig
       - name: Create web-config.yml
         win_template:
           src: web-config.yml.j2
           dest: "{{ install_dir }}/web-config.yml"
-        when: webconfig.stat.exists == false
+      #  when: webconfig.stat.exists == false
       #- name:
       #  debug:
       #    msg: "{{ file_key }}"
