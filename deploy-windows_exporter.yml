@@ -31,19 +31,19 @@
               server_name: "{{ ansible_fqdn | lower }}"
           - name:
             win_uri:
-              url: "{{ VAULT_ADDR }}/v1/auth/approle/login"
+              url: "{{ lookup('env','VAULT_ADDR') }}/v1/auth/approle/login"
               method: POST
               return_content: true
               headers:
                 accept: application/json
               body:
-                role_id: "{{ lookup('env','role_id') }}"
-                secret_id: "{{ lookup('env','secret_id') }}"
+                role_id: "{{ lookup('env','ROLE_ID') }}"
+                secret_id: "{{ lookup('env','SECRET_ID') }}"
               status_code: 200
             register: vault_auth
           - name:
             win_uri:
-              url: "{{ VAULT_ADDR }}/v1/prompki/issue/server"
+              url: "{{ lookup('env','VAULT_ADDR') }}/v1/prompki/issue/server"
               method: POST
               return_content: true
               headers:
@@ -53,7 +53,7 @@
                 common_name: "{{ server_name }}"
                 alt_names: "{{ server_name }}"
                 private_key_format: "pkcs8"
-                ttl: "8760h"
+                ttl: "{{ cert_ttl }}"
                 format: "pem"
               status_code: 200
             register: cert
