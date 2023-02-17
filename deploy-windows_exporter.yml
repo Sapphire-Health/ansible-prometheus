@@ -9,7 +9,7 @@
           #path: "C:\\Windows\\Temp\\{{ package_name }}"
           product_id: windows_exporter
           state: absent
-        when: uninstall
+        when: uninstall == "yes"
       - name: Check if install directory exists
         win_stat: 
           path: "{{ install_dir }}"  
