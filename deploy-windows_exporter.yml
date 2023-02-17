@@ -3,6 +3,13 @@
     hosts: "{{ match_host }}"
     gather_facts: true
     tasks:
+      - name: Uninstall windows_exporter
+        #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
+        win_package:
+          #path: "C:\\Windows\\Temp\\{{ package_name }}"
+          product_id: windows_exporter
+          state: absent
+        when: uninstall
       - name: Check if install directory exists
         win_stat: 
           path: "{{ install_dir }}"  
