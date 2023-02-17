@@ -7,7 +7,7 @@
         #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
         win_package:
           #path: "C:\\Windows\\Temp\\{{ package_name }}"
-          product_id: windows_exporter
+          product_id: "{{ product_id }}"
           state: absent
         when: uninstall == "yes"
       - name: Check if install directory exists
