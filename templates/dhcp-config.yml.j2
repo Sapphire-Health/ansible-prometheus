@@ -1,5 +1,8 @@
 collectors:
-  enabled: cpu,cs,logical_disk,os,system,dhcp
+  enabled: cpu,cs,logical_disk,os,system,dhcp,service
+collector:
+  service:
+    services-where: "Name='DHCPServer' OR Name='DHCP Management'"
 log:
   level: warn
 telemetry:
