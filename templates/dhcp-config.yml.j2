@@ -1,0 +1,11 @@
+collectors:
+  enabled: cpu,cs,logical_disk,os,system,dhcp,service
+collector:
+  service:
+    services-where: "Name='DHCPServer' OR Name='DHCP Management'"
+log:
+  level: warn
+telemetry:
+  addr: ":9182"
+  path: /metrics
+  max-requests: 5
