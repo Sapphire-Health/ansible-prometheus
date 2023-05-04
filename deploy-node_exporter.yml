@@ -1,0 +1,95 @@
+---
+  - name: Deploy node_exporter
+    hosts: "{{ match_host }}"
+    gather_facts: true
+    become: true
+    pre_tasks:
+      - name: Set cert_common_name to hostname if it isn't already
+        set_fact:
+          cert_common_name: "{{ ansible_fqdn }}"
+      - name: Append lcmchealth.org to hostname if it isn't already
+        set_fact:
+          cert_common_name: "{{ ansible_fqdn }}.lcmchealth.org"
+        when: not cert_common_name is search(".lcmchealth.org")
+      - name: Check if install directory exists
+        stat: 
+          path: "{{ install_dir }}"  
+        register: installdir
+      - name: Create install directory if it doesn't exist
+        file:
+          path: "{{ install_dir }}"
+          state: directory
+        when: installdir.stat.exists == false
+      - name: Check if ca file exists
+        stat: 
+          path: "{{ install_dir }}/ca.crt"  
+        register: file_ca
+      - name: Check if cert file exists
+        stat: 
+          path: "{{ install_dir }}/tls.crt"  
+        register: file_cert
+      - name: Check if key file exists
+        stat: 
+          path: "{{ install_dir }}/tls.key"  
+        register: file_key
+      - name: Generate certificates
+        block:
+          - name: Get server name (GATHER_FACTS MUST BE TRUE OR THIS WILL FAIL)
+            set_fact:
+              server_name: "{{ cert_common_name | lower }}"
+          - name:
+            uri:
+              url: "{{ lookup('env','VAULT_ADDR') }}/v1/auth/approle/login"
+              method: POST
+              return_content: true
+              headers:
+                accept: application/json
+              body_format: json
+              body:
+                role_id: "{{ lookup('env','ROLE_ID') }}"
+                secret_id: "{{ lookup('env','SECRET_ID') }}"
+              status_code: 200
+            register: vault_auth
+          - name:
+            uri:
+              url: "{{ lookup('env','VAULT_ADDR') }}/v1/prompki/issue/server"
+              method: POST
+              return_content: true
+              headers:
+                accept: application/json
+                X-Vault-Token: "{{ vault_auth.json.auth.client_token }}"
+              body_format: json
+              body:
+                common_name: "{{ server_name }}"
+                alt_names: "{{ server_name }}"
+                private_key_format: "pkcs8"
+                ttl: "{{ cert_ttl }}"
+                format: "pem"
+              status_code: 200
+            register: cert
+          #- name:
+          #  debug:
+          #    msg: "{{ cert.json }}"
+          - name: Write ca file
+            copy:
+              content: "{{ cert.json.data.issuing_ca }}"
+              dest: "{{ install_dir }}/ca.crt"  
+          - name: Write cert file
+            copy:
+              content: "{{ cert.json.data.certificate }}"
+              dest: "{{ install_dir }}/tls.crt"  
+          - name: Write key file
+            copy:
+              content: "{{ cert.json.data.private_key }}"
+              dest: "{{ install_dir }}/tls.key"  
+        when: file_ca.stat.exists == false or file_cert.stat.exists == false or file_key.stat.exists == false
+      #- name: Create config.yml
+      #  template:
+      #    src: "{{ prometheus_config | default('config.yml.j2') }}"
+      #    dest: "{{ install_dir }}/config.yml"
+      #- name: Create web-config.yml
+      #  template:
+      #    src: web-config.yml.j2
+      #    dest: "{{ install_dir }}/web-config.yml"
+    roles:
+      - prometheus.prometheus.node_exporter

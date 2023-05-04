@@ -36,9 +36,14 @@ install_params: "EXTRA_FLAGS=\"--config.file \"\"C:\\Program Files\\windows_expo
 EOF
 ```
 
-### Get a kerberos ticket
+### Get a kerberos ticket (Windows)
 ```
 kinit username@DOMAIN.TLD
+```
+
+### Install prometheus.prometheus collection (Linux)
+```
+ansible-galaxy collection install prometheus.prometheus
 ```
 
 ### Run the playbook
