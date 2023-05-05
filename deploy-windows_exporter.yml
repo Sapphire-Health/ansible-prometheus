@@ -86,7 +86,7 @@
       #  register: config
       - name: Show config vars
         debug:
-          msg: "Using template {{ prometheus_config }} with the following enabled collectors: {{ enabled_collectors }}"
+          msg: "Using template {{ prometheus_config }} with the following enabled collectors: {{ prometheus_enabled_collectors }}"
       - name: Create config.yml
         win_template:
           src: "{{ prometheus_config | default('config.yml.j2') }}"
