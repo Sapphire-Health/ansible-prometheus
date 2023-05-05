@@ -1,5 +1,5 @@
 collectors:
-  enabled: "{{ enabled_collectors }}"
+  enabled: {{ prometheus_enabled_collectors }}
 collector:
   service:
     services-where: "Name='print management' OR Name='spooler'"
