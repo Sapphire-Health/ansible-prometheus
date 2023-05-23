@@ -1,7 +1,7 @@
 ---
   - name: Deploy windows_exporter
     hosts: "{{ match_host }}"
-    gather_facts: true
+    gather_facts: false
     tasks:
       - name: Uninstall windows_exporter
         #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
@@ -35,7 +35,7 @@
         block:
           - name: Get server name (GATHER_FACTS MUST BE TRUE OR THIS WILL FAIL)
             set_fact:
-              server_name: "{{ ansible_fqdn | lower }}"
+              server_name: "{{ inventory_hostname | lower }}"
           - name:
             win_uri:
               url: "{{ lookup('env','VAULT_ADDR') }}/v1/auth/approle/login"
