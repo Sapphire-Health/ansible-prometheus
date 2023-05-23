@@ -38,6 +38,7 @@
               server_name: "{{ inventory_hostname | lower }}"
           - name:
             win_uri:
+              validate_certs: no
               url: "{{ lookup('env','VAULT_ADDR') }}/v1/auth/approle/login"
               method: POST
               return_content: true
@@ -50,6 +51,7 @@
             register: vault_auth
           - name:
             win_uri:
+              validate_certs: no
               url: "{{ lookup('env','VAULT_ADDR') }}/v1/prompki/issue/server"
               method: POST
               return_content: true
