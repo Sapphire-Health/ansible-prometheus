@@ -2,7 +2,7 @@ collectors:
   enabled: {{ prometheus_enabled_collectors }}
 collector:
   service:
-    services-where: "Name='print management' OR Name='spooler'"
+    services-where: "Name='print management' OR Name='spooler' OR Name='winlogbeat'"
 log:
   level: warn
 telemetry:
