@@ -3,6 +3,12 @@
     hosts: "{{ match_host }}"
     gather_facts: false
     tasks:
+      - name: Get server name (GATHER_FACTS MUST BE TRUE OR THIS WILL FAIL)
+        set_fact:
+          renew_cert: "{{ force_cert_renewal | default(false) }}"
+      - name: show value
+        debug:
+          msg: "{{renew_cert}}"
       - name: Uninstall windows_exporter
         #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
         win_package:
@@ -81,14 +87,14 @@
             win_copy:
               content: "{{ cert.json.data.private_key }}"
               dest: "{{ install_dir }}/cert.key"  
-        when: file_ca.stat.exists == false or file_cert.stat.exists == false or file_key.stat.exists == false
+        when: file_ca.stat.exists == false or file_cert.stat.exists == false or file_key.stat.exists == false or renew_cert == true
       #- name: Check if config exists
       #  win_stat: 
       #    path: "{{ install_dir }}/config.yml"
       #  register: config
       - name: Show config vars
         debug:
-          msg: "Using template {{ prometheus_config }} with the following enabled collectors: {{ prometheus_enabled_collectors }}"
+          msg: "Using template {{ prometheus_config | default('config.yml.j2') }} with the following enabled collectors: {{ prometheus_enabled_collectors }}"
       - name: Create config.yml
         win_template:
           src: "{{ prometheus_config | default('config.yml.j2') }}"
