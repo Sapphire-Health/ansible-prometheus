@@ -55,5 +55,13 @@ export SECRET_ID=00000000-0000-0000-0000-000000000000
 
 ### Install Prometheus on Windows
 ```
-ansible-playbook -i hosts.yml -e @vars.yml deploy-windows_exporter.yml
+ansible-playbook -i hosts.yml -e @vars_windows.yml deploy-windows_exporter.yml
 ```
+
+### Install Prometheus on Linux
+```
+ansible-playbook -i hosts.yml -e @vars_linux.yml deploy-node_exporter.yml
+```
+
+cd /tmp
+wget https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz
