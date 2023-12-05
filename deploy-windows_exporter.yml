@@ -115,9 +115,14 @@
       #  debug:
       #    msg: "{{ file_key }}"
       - name: Download windows_exporter
-        win_get_url:
+        get_url:
           url: "{{ package_url }}{{ package_name }}"
-          dest: C:\Windows\Temp\
+          dest: "/tmp/{{ package_name }}"
+        delegate_to: localhost
+      - name: Copy a single file
+        ansible.windows.win_copy:
+          src: "/tmp/{{ package_name }}"
+          dest: "C:\\Windows\\Temp\\{{ package_name }}"
       - name: Install/Update windows_exporter
         #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
         win_package:
