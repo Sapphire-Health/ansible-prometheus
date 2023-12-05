@@ -50,6 +50,7 @@
                 secret_id: "{{ lookup('env','SECRET_ID') }}"
               status_code: 200
             register: vault_auth
+            delegate_to: localhost
           - name:
             uri:
               url: "{{ lookup('env','VAULT_ADDR') }}/v1/prompki/issue/server"
@@ -67,6 +68,7 @@
                 format: "pem"
               status_code: 200
             register: cert
+            delegate_to: localhost
           #- name:
           #  debug:
           #    msg: "{{ cert.json }}"

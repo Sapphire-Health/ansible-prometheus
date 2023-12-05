@@ -43,27 +43,28 @@
             set_fact:
               server_name: "{{ inventory_hostname | lower }}"
           - name:
-            win_uri:
-              validate_certs: no
+            uri:
               url: "{{ lookup('env','VAULT_ADDR') }}/v1/auth/approle/login"
               method: POST
               return_content: true
               headers:
                 accept: application/json
+              body_format: json
               body:
                 role_id: "{{ lookup('env','ROLE_ID') }}"
                 secret_id: "{{ lookup('env','SECRET_ID') }}"
               status_code: 200
             register: vault_auth
+            delegate_to: localhost
           - name:
-            win_uri:
-              validate_certs: no
+            uri:
               url: "{{ lookup('env','VAULT_ADDR') }}/v1/prompki/issue/server"
               method: POST
               return_content: true
               headers:
                 accept: application/json
                 X-Vault-Token: "{{ vault_auth.json.auth.client_token }}"
+              body_format: json
               body:
                 common_name: "{{ server_name }}"
                 alt_names: "{{ server_name }}"
@@ -72,6 +73,7 @@
                 format: "pem"
               status_code: 200
             register: cert
+            delegate_to: localhost
           #- name:
           #  debug:
           #    msg: "{{ cert.json }}"
