@@ -4,6 +4,9 @@
     gather_facts: true
     become: true
     pre_tasks:
+      - name: Determine whether cert renewal should be forced
+        set_fact:
+          renew_cert: "{{ force_cert_renewal | default(false) }}"
       - name: Set cert_common_name to hostname if it isn't already
         set_fact:
           cert_common_name: "{{ ansible_fqdn }}"
@@ -84,7 +87,7 @@
             copy:
               content: "{{ cert.json.data.private_key }}"
               dest: "{{ install_dir }}/tls.key"  
-        when: file_ca.stat.exists == false or file_cert.stat.exists == false or file_key.stat.exists == false
+        when: file_ca.stat.exists == false or file_cert.stat.exists == false or file_key.stat.exists == false or renew_cert == true
       #- name: Create config.yml
       #  template:
       #    src: "{{ prometheus_config | default('config.yml.j2') }}"
