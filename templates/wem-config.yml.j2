@@ -2,7 +2,7 @@ collectors:
   enabled: {{ prometheus_enabled_collectors }}
 collector:
   service:
-    services-where: "Name='Norskale Infrastructure Service'"
+    include: "Norskale Infrastructure Service"
 log:
   level: warn
 telemetry:

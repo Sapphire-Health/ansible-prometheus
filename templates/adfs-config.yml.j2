@@ -2,7 +2,7 @@ collectors:
   enabled: {{ prometheus_enabled_collectors }}
 collector:
   service:
-    services-where: "Name='adfssrv'"
+    include: "adfssrv"
 log:
   level: warn
 telemetry:

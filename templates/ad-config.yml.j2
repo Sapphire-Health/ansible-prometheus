@@ -2,7 +2,7 @@ collectors:
   enabled: {{ prometheus_enabled_collectors }}
 collector:
   service:
-    services-where: "Name='DNS' OR Name='Kdc' OR Name='Netlogon' OR Name='NTDS' OR Name='AuthLite'"
+    include: "(DNS|Kdc|Netlogon|NTDS|AuthLite|LansweeperAgentService)"
 log:
   level: warn
 telemetry:

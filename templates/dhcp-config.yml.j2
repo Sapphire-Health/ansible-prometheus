@@ -2,7 +2,7 @@ collectors:
   enabled: {{ prometheus_enabled_collectors }}
 collector:
   service:
-    services-where: "Name='DHCPServer' OR Name='DHCP Management'"
+    include: "(DHCPServer|DHCP Management)"
 log:
   level: warn
 telemetry:
