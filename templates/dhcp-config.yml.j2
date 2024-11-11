@@ -2,7 +2,7 @@ collectors:
   enabled: {{ prometheus_enabled_collectors }}
 collector:
   service:
-    include: "(DHCPServer)"
+    include: "(DHCPServer|DHCP Management)"
 log:
   level: warn
 telemetry:
