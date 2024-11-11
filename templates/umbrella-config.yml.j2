@@ -1,0 +1,11 @@
+collectors:
+  enabled: {{ prometheus_enabled_collectors }}
+collector:
+  service:
+    include: "(OpenDNS Active Directory Service)"
+log:
+  level: warn
+telemetry:
+  addr: ":9182"
+  path: /metrics
+  max-requests: 5
