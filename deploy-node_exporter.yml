@@ -1,6 +1,6 @@
 ---
   - name: Deploy node_exporter
-    hosts: "{{ match_host }}"
+    hosts: all
     gather_facts: true
     become: true
     pre_tasks:

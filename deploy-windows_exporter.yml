@@ -1,6 +1,6 @@
 ---
   - name: Deploy windows_exporter
-    hosts: "{{ match_host }}"
+    hosts: all
     gather_facts: false
     tasks:
       - name: Get server name (GATHER_FACTS MUST BE TRUE OR THIS WILL FAIL)

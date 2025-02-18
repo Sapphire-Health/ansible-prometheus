@@ -55,12 +55,12 @@ export SECRET_ID=00000000-0000-0000-0000-000000000000
 
 ### Install Prometheus on Windows
 ```
-ansible-playbook -i hosts.yml -e @vars_windows.yml deploy-windows_exporter.yml
+ansible-playbook -i hosts.yml --limit=ch-lansweeper1.lcmchealth.org -e @vars_windows.yml deploy-windows_exporter.yml
 ```
 
 ### Install Prometheus on Linux
 ```
-ansible-playbook -i hosts.yml -e @vars_linux.yml deploy-node_exporter.yml
+ansible-playbook -i hosts.yml --limit=ansibletest04.lcmchealth.org -e @vars_linux.yml deploy-node_exporter.yml
 ```
 
 cd /tmp
