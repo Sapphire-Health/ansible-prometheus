@@ -90,63 +90,53 @@
               content: "{{ cert.json.data.private_key }}"
               dest: "{{ install_dir }}/cert.key"  
         when: file_ca.stat.exists == false or file_cert.stat.exists == false or file_key.stat.exists == false or renew_cert == true
-      #- name: Check if config exists
-      #  win_stat: 
-      #    path: "{{ install_dir }}/config.yml"
-      #  register: config
-      - name: Show config vars
-        debug:
-          msg: "Using template {{ prometheus_config | default('config.yml.j2') }} with the following enabled collectors: {{ prometheus_enabled_collectors }}"
-      - name: Create config.yml
-        win_template:
-          src: "{{ prometheus_config | default('config.yml.j2') }}"
-          dest: "{{ install_dir }}/config.yml"
-      #  when: config.stat.exists == false
-      #- name: Check if web config exists
-      #  win_stat: 
-      #    path: "{{ install_dir }}/web-config.yml"
-      #  register: webconfig
-      - name: Create web-config.yml
-        win_template:
-          src: web-config.yml.j2
-          dest: "{{ install_dir }}/web-config.yml"
-      #  when: webconfig.stat.exists == false
-      #- name:
-      #  debug:
-      #    msg: "{{ file_key }}"
-      - name: Download windows_exporter
-        get_url:
-          url: "{{ package_url }}{{ package_name }}"
-          dest: "/tmp/{{ package_name }}"
-        delegate_to: localhost
-      - name: Copy a single file
-        ansible.windows.win_copy:
-          src: "/tmp/{{ package_name }}"
-          dest: "C:\\Windows\\Temp\\{{ package_name }}"
-      - name: Install/Update windows_exporter
-        #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
-        win_package:
-          path: "C:\\Windows\\Temp\\{{ package_name }}"
-          #product_id: "{{ product_id }}"
-          state: present
-          arguments: "{{ install_params }}"
-      #netsh advfirewall firewall add rule name="windows_exporter" dir=in action=allow protocol=tcp localport=9182 profile=any remoteip=any
-      #windows_exporter creates a firewall rule automatically
-      #- name: Create a firewall rule to allow traffic to the windows_exporter listening port
-      #  win_firewall_rule:
-      #    name: windows_exporter
-      #    localport: 9182
-      #    action: allow
-      #    direction: in
-      #    protocol: tcp
-      #    profiles: domain,private,public
-      #    remoteip: any
-      #    state: present
-      #    enabled: yes
-      - name: Delete windows_exporter msi
-        win_file:
-          path: "C:\\Windows\\Temp\\{{ package_name }}"
-          state: absent
+      - name: Install windows_exporter
+        when: cert_only is not defined or cert_only == false
+        block:
+          - name: Show config vars
+            debug:
+              msg: "Using template {{ prometheus_config | default('config.yml.j2') }} with the following enabled collectors: {{ prometheus_enabled_collectors }}"
+          - name: Create config.yml
+            win_template:
+              src: "{{ prometheus_config | default('config.yml.j2') }}"
+              dest: "{{ install_dir }}/config.yml"
+          - name: Create web-config.yml
+            win_template:
+              src: web-config.yml.j2
+              dest: "{{ install_dir }}/web-config.yml"
+          - name: Download windows_exporter
+            get_url:
+              url: "{{ package_url }}{{ package_name }}"
+              dest: "/tmp/{{ package_name }}"
+            delegate_to: localhost
+          - name: Copy a single file
+            ansible.windows.win_copy:
+              src: "/tmp/{{ package_name }}"
+              dest: "C:\\Windows\\Temp\\{{ package_name }}"
+          - name: Install/Update windows_exporter
+            #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
+            win_package:
+              path: "C:\\Windows\\Temp\\{{ package_name }}"
+              #product_id: "{{ product_id }}"
+              state: present
+              arguments: "{{ install_params }}"
+          #netsh advfirewall firewall add rule name="windows_exporter" dir=in action=allow protocol=tcp localport=9182 profile=any remoteip=any
+          #windows_exporter creates a firewall rule automatically
+          #- name: Create a firewall rule to allow traffic to the windows_exporter listening port
+          #  win_firewall_rule:
+          #    name: windows_exporter
+          #    localport: 9182
+          #    action: allow
+          #    direction: in
+          #    protocol: tcp
+          #    profiles: domain,private,public
+          #    remoteip: any
+          #    state: present
+          #    enabled: yes
+          - name: Delete windows_exporter msi
+            win_file:
+              path: "C:\\Windows\\Temp\\{{ package_name }}"
+              state: absent
       - name: Restart a service
         win_service:
           name: windows_exporter
