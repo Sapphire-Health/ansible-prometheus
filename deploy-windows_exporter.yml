@@ -11,30 +11,30 @@
           msg: "{{renew_cert}}"
       - name: Uninstall windows_exporter
         #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
-        win_package:
+        ansible.windows.win_package:
           #path: "C:\\Windows\\Temp\\{{ package_name }}"
           product_id: "{{ product_id }}"
           state: absent
         when: uninstall == "yes"
       - name: Check if install directory exists
-        win_stat: 
+        ansible.windows.win_stat: 
           path: "{{ install_dir }}"  
         register: installdir
       - name: Create install directory if it doesn't exist
-        win_file:
+        ansible.windows.win_file:
           path: "{{ install_dir }}"
           state: directory
         when: installdir.stat.exists == false
       - name: Check if ca file exists
-        win_stat: 
+        ansible.windows.win_stat: 
           path: "{{ install_dir }}/ca.crt"  
         register: file_ca
       - name: Check if cert file exists
-        win_stat: 
+        ansible.windows.win_stat: 
           path: "{{ install_dir }}/cert.crt"  
         register: file_cert
       - name: Check if key file exists
-        win_stat: 
+        ansible.windows.win_stat: 
           path: "{{ install_dir }}/cert.key"  
         register: file_key
       - name: Generate certificates
@@ -78,15 +78,15 @@
           #  debug:
           #    msg: "{{ cert.json }}"
           - name: Write ca file
-            win_copy:
+            ansible.windows.win_copy:
               content: "{{ cert.json.data.issuing_ca }}"
               dest: "{{ install_dir }}/ca.crt"  
           - name: Write cert file
-            win_copy:
+            ansible.windows.win_copy:
               content: "{{ cert.json.data.certificate }}"
               dest: "{{ install_dir }}/cert.crt"  
           - name: Write key file
-            win_copy:
+            ansible.windows.win_copy:
               content: "{{ cert.json.data.private_key }}"
               dest: "{{ install_dir }}/cert.key"  
         when: file_ca.stat.exists == false or file_cert.stat.exists == false or file_key.stat.exists == false or renew_cert == true
@@ -97,15 +97,15 @@
             debug:
               msg: "Using template {{ prometheus_config | default('config.yml.j2') }} with the following enabled collectors: {{ prometheus_enabled_collectors }}"
           - name: Create config.yml
-            win_template:
+            ansible.windows.win_template:
               src: "{{ prometheus_config | default('config.yml.j2') }}"
               dest: "{{ install_dir }}/config.yml"
           - name: Create web-config.yml
-            win_template:
+            ansible.windows.win_template:
               src: web-config.yml.j2
               dest: "{{ install_dir }}/web-config.yml"
           - name: Download windows_exporter
-            get_url:
+            ansible.windows.get_url:
               url: "{{ package_url }}{{ package_name }}"
               dest: "/tmp/{{ package_name }}"
             delegate_to: localhost
@@ -115,7 +115,7 @@
               dest: "C:\\Windows\\Temp\\{{ package_name }}"
           - name: Install/Update windows_exporter
             #win_command: "C:/Windows/Temp/{{ package_name }} {{ install_params }}"
-            win_package:
+            ansible.windows.win_package:
               path: "C:\\Windows\\Temp\\{{ package_name }}"
               #product_id: "{{ product_id }}"
               state: present
@@ -134,10 +134,10 @@
           #    state: present
           #    enabled: yes
           - name: Delete windows_exporter msi
-            win_file:
+            ansible.windows.win_file:
               path: "C:\\Windows\\Temp\\{{ package_name }}"
               state: absent
       - name: Restart a service
-        win_service:
+        ansible.windows.win_service:
           name: windows_exporter
           state: restarted
