@@ -105,7 +105,7 @@
               src: web-config.yml.j2
               dest: "{{ install_dir }}/web-config.yml"
           - name: Download windows_exporter
-            ansible.windows.get_url:
+            ansible.builtin.get_url:
               url: "{{ package_url }}{{ package_name }}"
               dest: "/tmp/{{ package_name }}"
             delegate_to: localhost
