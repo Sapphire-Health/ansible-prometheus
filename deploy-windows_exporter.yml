@@ -3,6 +3,12 @@
     hosts: all
     gather_facts: false
     tasks:
+      - name: Check version of installed ansible.windows collection
+        ansible.builtin.debug:
+          msg: "ansible.windows version {{ lookup('community.general.collection_version', 'ansible.windows') }}"
+      - name: Check if uninstall is requested
+        ansible.builtin.set_fact:
+          uninstall: "{{ uninstall | default('no') }}"
       - name: Get server name (GATHER_FACTS MUST BE TRUE OR THIS WILL FAIL)
         set_fact:
           renew_cert: "{{ force_cert_renewal | default(false) }}"
@@ -120,19 +126,6 @@
               #product_id: "{{ product_id }}"
               state: present
               arguments: "{{ install_params }}"
-          #netsh advfirewall firewall add rule name="windows_exporter" dir=in action=allow protocol=tcp localport=9182 profile=any remoteip=any
-          #windows_exporter creates a firewall rule automatically
-          #- name: Create a firewall rule to allow traffic to the windows_exporter listening port
-          #  win_firewall_rule:
-          #    name: windows_exporter
-          #    localport: 9182
-          #    action: allow
-          #    direction: in
-          #    protocol: tcp
-          #    profiles: domain,private,public
-          #    remoteip: any
-          #    state: present
-          #    enabled: yes
           - name: Delete windows_exporter msi
             ansible.windows.win_file:
               path: "C:\\Windows\\Temp\\{{ package_name }}"
