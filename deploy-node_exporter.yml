@@ -97,4 +97,5 @@
       #    src: web-config.yml.j2
       #    dest: "{{ install_dir }}/web-config.yml"
     roles:
-      - prometheus.prometheus.node_exporter
+      - role: prometheus.prometheus.node_exporter
+        when: cert_only is not defined or cert_only == false
